@@ -79,11 +79,11 @@
             font-family: inherit;
         }
         select {
-            flex-basis: 120px; /* ⭐️ 너비 고정 */
+            width: 120px; /* ⭐️ 너비 고정 */
             flex-shrink: 0; /* ⭐️ 줄어들지 않도록 */
         }
         input {
-            flex-grow: 1; /* ⭐️ 남은 공간 채우기 */
+            width: calc(100% - 120px - 0.75rem); /* ⭐️ 남은 공간 채우기 */
         }
         button {
             width: 100%;
@@ -137,7 +137,7 @@
         
         <div class="warning-message">
             <i class="fas fa-exclamation-triangle"></i>
-            <span>5km 초과 검색 시 30초에서 60초 가량 소요될 수 있습니다.</span>
+            <span>5km 초과 검색 시 30초에서 60초  가량 소요될 수 있습니다.</span>
         </div>
 
         <div class="controls">
