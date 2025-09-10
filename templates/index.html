@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>지지기 동네 찾기</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -50,17 +50,15 @@
         .warning-message i { font-size: 1.2rem; color: var(--warning-color); }
         .controls, .price-controls { display: flex; gap: 0.75rem; }
         .controls { margin-bottom: 0.5rem; }
-        
-        /* ⭐️ 변경된 부분: 필터와 결과창을 감싸는 컨테이너 스타일 */
         .result-area {
             margin-top: 1rem;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem; /* 필터와 결과창 사이 간격 */
+            gap: 0.5rem;
         }
         .result-header {
             display: flex;
-            justify-content: space-between; /* 양쪽 끝으로 정렬 */
+            justify-content: space-between;
             align-items: center;
         }
         .filter-controls {
@@ -88,7 +86,6 @@
         button:hover { opacity: 0.85; }
         #price-button { background-color: var(--secondary-color); flex-grow: 1; }
         
-        /* ⭐️ 추가된 부분: 복사하기 버튼 스타일 */
         #copy-button {
             width: auto;
             padding: 0.3rem 0.7rem;
@@ -100,7 +97,17 @@
 
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 2rem auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #result { background-color: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); min-height: 100px; white-space: pre-wrap; word-break: keep-all; line-height: 1.6; font-size: 0.95rem; }
+        #result { 
+            background-color: #f8f9fa; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            border: 1px solid var(--border-color); 
+            min-height: 100px; 
+            white-space: pre-wrap; 
+            line-height: 1.6; 
+            font-size: 0.95rem; 
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -133,7 +140,7 @@
         </div>
         
         <div class="price-controls">
-            <input type="number" id="priceInput" placeholder="(예: 40)">
+            <input type="number" id="priceInput" placeholder="금액 (예: 40)">
             <button id="price-button">금액 집어넣기</button>
         </div>
     </div>
@@ -150,10 +157,9 @@
         const dongFilter = document.getElementById('dong-filter');
         const searchButton = document.getElementById('search-button');
         const priceButton = document.getElementById('price-button');
-        const copyButton = document.getElementById('copy-button'); // ⭐️ 추가
+        const copyButton = document.getElementById('copy-button');
 
         function updateDisplay() {
-            // ... (updateDisplay 함수 내용은 이전과 동일)
             if (!originalSearchResult) return;
             const price = priceInput.value;
             const showGuOnly = guFilter.checked;
@@ -162,21 +168,24 @@
             let newNeighborhoods = neighborhoods.map(fullDong => {
                 let displayDong = fullDong.trim();
                 const parts = displayDong.split(' ');
-                if (showGuOnly && parts.length >= 2) {
+                
+                if (showGuOnly && parts.length >= 3) { 
                     displayDong = parts.slice(1).join(' ');
                 } else if (showDongOnly && parts.length >= 2) {
                     displayDong = parts[parts.length - 1];
                 }
+                
                 if (price) {
                     displayDong += '#' + price;
                 }
+                
                 return displayDong;
             });
+            
             resultDiv.textContent = newNeighborhoods.join(',');
         }
 
         async function search() {
-            // ... (search 함수 내용은 이전과 동일)
             const query = queryInput.value;
             const distance = distanceSelect.value;
             if (!query) { resultDiv.textContent = '기준 동네를 입력해주세요!'; return; }
@@ -203,21 +212,17 @@
             }
         }
 
-        // ⭐️ 추가된 부분: 복사하기 기능 함수
         function copyResults() {
             const textToCopy = resultDiv.textContent;
-            // 결과가 없거나 초기 메시지일 경우 복사 안 함
             if (!textToCopy || textToCopy.startsWith('결과가') || textToCopy.startsWith('오류:')) {
                 return;
             }
-
             navigator.clipboard.writeText(textToCopy).then(() => {
-                // 성공 시 버튼 모양 변경
                 const originalContent = copyButton.innerHTML;
                 copyButton.innerHTML = '<i class="fas fa-check"></i> 복사 완료!';
                 setTimeout(() => {
                     copyButton.innerHTML = originalContent;
-                }, 2000); // 2초 후에 원래대로 돌아옴
+                }, 2000);
             }).catch(err => {
                 console.error('복사 실패:', err);
             });
@@ -233,7 +238,7 @@
             if (dongFilter.checked) guFilter.checked = false;
             updateDisplay();
         });
-        copyButton.addEventListener('click', copyResults); // ⭐️ 추가
+        copyButton.addEventListener('click', copyResults);
     </script>
 </body>
 </html>
