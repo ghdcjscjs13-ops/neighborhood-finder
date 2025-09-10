@@ -7,13 +7,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* CSS 스타일 부분은 이전과 동일 */
         :root {
             --primary-color: #007bff;
             --text-color: #212529;
             --card-bg-color: #ffffff;
             --border-color: #dee2e6;
+            --warning-color: #ffc107; /* ⭐️ 경고 메시지 색상 추가 */
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -29,31 +30,116 @@
         }
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 600px; /* ⭐️ 최대 너비 유지 */
             background-color: var(--card-bg-color);
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex; /* ⭐️ 내부 요소 정렬을 위해 flexbox 사용 */
+            flex-direction: column; /* ⭐️ 세로 정렬 */
+            gap: 1rem; /* ⭐️ 요소들 사이 간격 추가 */
         }
-        h1 { text-align: center; margin-bottom: 0.5rem; font-weight: 700; }
-        p { text-align: center; margin-bottom: 1.5rem; color: #6c757d; }
-        .controls { display: flex; gap: 1rem; margin-bottom: 1rem; }
-        select, input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; font-family: inherit; }
-        select { flex-basis: 120px; }
-        input { flex-grow: 1; }
-        button { width: 100%; padding: 0.85rem; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
-        button:hover { background-color: #0056b3; }
-        .result-container { margin-top: 1.5rem; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 2rem auto; display: none; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #result { background-color: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); min-height: 100px; white-space: pre-wrap; word-break: keep-all; line-height: 1.6; }
+        h1 {
+            text-align: center;
+            margin-bottom: 0.5rem; /* ⭐️ 간격 조절 */
+            font-weight: 700;
+        }
+        .description { /* ⭐️ 새로운 설명/경고 문구 클래스 */
+            text-align: center;
+            margin-bottom: 0.5rem; /* ⭐️ 간격 조절 */
+            color: #6c757d;
+        }
+        .warning-message { /* ⭐️ 경고 메시지 스타일 */
+            background-color: #fff3cd; /* 부드러운 노란색 배경 */
+            color: #856404; /* 어두운 노란색 글씨 */
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem; /* 아래쪽 간격 */
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.95rem;
+        }
+        .warning-message i {
+            font-size: 1.2rem;
+            color: var(--warning-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem; /* ⭐️ 입력 필드와 셀렉트 박스 간격 조절 */
+            margin-bottom: 0.5rem; /* ⭐️ 버튼 위 간격 조절 */
+        }
+        select, input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        select {
+            flex-basis: 120px; /* ⭐️ 너비 고정 */
+            flex-shrink: 0; /* ⭐️ 줄어들지 않도록 */
+        }
+        input {
+            flex-grow: 1; /* ⭐️ 남은 공간 채우기 */
+        }
+        button {
+            width: 100%;
+            padding: 0.85rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-container {
+            margin-top: 1rem; /* ⭐️ 간격 조절 */
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #result {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-break: keep-all;
+            line-height: 1.6;
+            font-size: 0.95rem; /* ⭐️ 폰트 크기 조절 */
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🗺️ 지지기 동네 찾기</h1>
-        <p>5km 이상은 30초에서 60초가까이 소요됩니다.</p>
+        <p class="description">기준점 주변의 동네를 찾아보세요.</p>
         
+        <div class="warning-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>5km 초과 검색 시 30초에서 60초 가량 소요될 수 있습니다.</span>
+        </div>
+
         <div class="controls">
             <select id="distanceSelect">
                 <option value="3" selected>3km</option>
@@ -90,7 +176,7 @@
 
             try {
                 const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&distance=${distance}`);
-                const data = await response.json();
+                const data = await await response.json();
 
                 if (data.error) {
                     resultDiv.textContent = `오류: ${data.error}`;
@@ -105,7 +191,6 @@
             }
         }
         
-        // ⭐️ 변경된 부분 2: 자바스크립트 코드로 버튼에 클릭 이벤트를 직접 연결
         document.getElementById('search-button').addEventListener('click', search);
     </script>
 </body>
