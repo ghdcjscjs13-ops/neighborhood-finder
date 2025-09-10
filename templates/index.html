@@ -66,7 +66,7 @@
             gap: 1rem;
             align-items: center;
             font-size: 0.9rem;
-            flex-wrap: wrap; /* ⭐️ 추가: 체크박스가 많아지면 줄바꿈 되도록 */
+            flex-wrap: wrap;
         }
         .filter-controls label { display: flex; align-items: center; cursor: pointer; }
         .filter-controls input[type="checkbox"] { margin-right: 0.4rem; }
@@ -157,7 +157,7 @@
         const priceInput = document.getElementById('priceInput');
         const guFilter = document.getElementById('gu-filter');
         const dongFilter = document.getElementById('dong-filter');
-        const removeDongFilter = document.getElementById('remove-dong-filter'); // ⭐️ 추가
+        const removeDongFilter = document.getElementById('remove-dong-filter');
         const searchButton = document.getElementById('search-button');
         const priceButton = document.getElementById('price-button');
         const copyButton = document.getElementById('copy-button');
@@ -167,7 +167,7 @@
             const price = priceInput.value;
             const showGuOnly = guFilter.checked;
             const showDongOnly = dongFilter.checked;
-            const removeDong = removeDongFilter.checked; // ⭐️ 추가
+            const removeDong = removeDongFilter.checked;
             
             let neighborhoods = originalSearchResult.split(',');
 
@@ -181,11 +181,17 @@
                     displayDong = parts[parts.length - 1];
                 }
                 
-                // ⭐️ 추가된 부분: '동'제거 로직
                 if (removeDong) {
-                    // 마지막 글자가 '동'으로 끝나면 '동'을 제거
-                    if (displayDong.endsWith('동')) {
-                        displayDong = displayDong.slice(0, -1);
+                    const originalBeforeRemove = displayDong;
+                    let removed = originalBeforeRemove;
+                    
+                    if (removed.endsWith('동')) {
+                        removed = removed.slice(0, -1);
+                    }
+                    
+                    // ⭐️ 변경된 부분: '동'을 제거한 후 글자 길이를 확인
+                    if (removed.length > 1) {
+                        displayDong = removed;
                     }
                 }
 
@@ -200,7 +206,6 @@
         }
 
         async function search() {
-            // ... (search 함수 내용은 이전과 동일)
             const query = queryInput.value;
             const distance = distanceSelect.value;
             if (!query) { resultDiv.textContent = '기준 동네를 입력해주세요!'; return; }
@@ -210,7 +215,7 @@
             originalSearchResult = '';
             guFilter.checked = false;
             dongFilter.checked = false;
-            removeDongFilter.checked = false; // ⭐️ 추가: 검색 시 '동'제거 필터도 초기화
+            removeDongFilter.checked = false;
             try {
                 const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&distance=${distance}`);
                 const data = await response.json();
@@ -229,7 +234,6 @@
         }
 
         function copyResults() {
-            // ... (copyResults 함수 내용은 이전과 동일)
             const textToCopy = resultDiv.textContent;
             if (!textToCopy || textToCopy.startsWith('결과가') || textToCopy.startsWith('오류:')) {
                 return;
@@ -255,7 +259,7 @@
             if (dongFilter.checked) guFilter.checked = false;
             updateDisplay();
         });
-        removeDongFilter.addEventListener('change', updateDisplay); // ⭐️ 추가
+        removeDongFilter.addEventListener('change', updateDisplay);
         copyButton.addEventListener('click', copyResults);
     </script>
 </body>
