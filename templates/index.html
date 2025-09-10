@@ -181,7 +181,7 @@
                 if (data.error) {
                     resultDiv.textContent = `오류: ${data.error}`;
                 } else {
-                    resultDiv.textContent = data.result.replace(/,/g, ', ');
+                    resultDiv.textContent = data.result.replace(/,/g, ',');
                 }
             } catch (error) {
                 resultDiv.textContent = '서버와 통신 중 오류가 발생했습니다.';
