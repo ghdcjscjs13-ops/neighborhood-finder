@@ -66,6 +66,7 @@
             gap: 1rem;
             align-items: center;
             font-size: 0.9rem;
+            flex-wrap: wrap; /* ⭐️ 추가: 체크박스가 많아지면 줄바꿈 되도록 */
         }
         .filter-controls label { display: flex; align-items: center; cursor: pointer; }
         .filter-controls input[type="checkbox"] { margin-right: 0.4rem; }
@@ -130,8 +131,9 @@
         <div class="result-area">
             <div class="result-header">
                 <div class="filter-controls">
-                    <label><input type="checkbox" id="gu-filter"> 구단위</label>
-                    <label><input type="checkbox" id="dong-filter"> 동단위</label>
+                    <label><input type="checkbox" id="gu-filter"> 구단위로만 보기</label>
+                    <label><input type="checkbox" id="dong-filter"> 동단위로만 보기</label>
+                    <label><input type="checkbox" id="remove-dong-filter"> '동'제거</label>
                 </div>
                 <button id="copy-button"><i class="fas fa-copy"></i> 복사하기</button>
             </div>
@@ -140,7 +142,7 @@
         </div>
         
         <div class="price-controls">
-            <input type="number" id="priceInput" placeholder="금액 (예: 40)">
+            <input type="number" id="priceInput" placeholder="(예: 40)">
             <button id="price-button">금액 집어넣기</button>
         </div>
     </div>
@@ -155,6 +157,7 @@
         const priceInput = document.getElementById('priceInput');
         const guFilter = document.getElementById('gu-filter');
         const dongFilter = document.getElementById('dong-filter');
+        const removeDongFilter = document.getElementById('remove-dong-filter'); // ⭐️ 추가
         const searchButton = document.getElementById('search-button');
         const priceButton = document.getElementById('price-button');
         const copyButton = document.getElementById('copy-button');
@@ -164,7 +167,10 @@
             const price = priceInput.value;
             const showGuOnly = guFilter.checked;
             const showDongOnly = dongFilter.checked;
+            const removeDong = removeDongFilter.checked; // ⭐️ 추가
+            
             let neighborhoods = originalSearchResult.split(',');
+
             let newNeighborhoods = neighborhoods.map(fullDong => {
                 let displayDong = fullDong.trim();
                 const parts = displayDong.split(' ');
@@ -175,6 +181,14 @@
                     displayDong = parts[parts.length - 1];
                 }
                 
+                // ⭐️ 추가된 부분: '동'제거 로직
+                if (removeDong) {
+                    // 마지막 글자가 '동'으로 끝나면 '동'을 제거
+                    if (displayDong.endsWith('동')) {
+                        displayDong = displayDong.slice(0, -1);
+                    }
+                }
+
                 if (price) {
                     displayDong += '#' + price;
                 }
@@ -186,6 +200,7 @@
         }
 
         async function search() {
+            // ... (search 함수 내용은 이전과 동일)
             const query = queryInput.value;
             const distance = distanceSelect.value;
             if (!query) { resultDiv.textContent = '기준 동네를 입력해주세요!'; return; }
@@ -195,6 +210,7 @@
             originalSearchResult = '';
             guFilter.checked = false;
             dongFilter.checked = false;
+            removeDongFilter.checked = false; // ⭐️ 추가: 검색 시 '동'제거 필터도 초기화
             try {
                 const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&distance=${distance}`);
                 const data = await response.json();
@@ -213,6 +229,7 @@
         }
 
         function copyResults() {
+            // ... (copyResults 함수 내용은 이전과 동일)
             const textToCopy = resultDiv.textContent;
             if (!textToCopy || textToCopy.startsWith('결과가') || textToCopy.startsWith('오류:')) {
                 return;
@@ -238,6 +255,7 @@
             if (dongFilter.checked) guFilter.checked = false;
             updateDisplay();
         });
+        removeDongFilter.addEventListener('change', updateDisplay); // ⭐️ 추가
         copyButton.addEventListener('click', copyResults);
     </script>
 </body>
