@@ -8,17 +8,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* CSS 스타일 부분은 이전과 동일 */
         :root {
             --primary-color: #007bff;
             --text-color: #212529;
             --card-bg-color: #ffffff;
             --border-color: #dee2e6;
         }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Noto Sans KR', sans-serif;
             color: var(--text-color);
@@ -27,10 +24,8 @@
             align-items: center;
             min-height: 100vh;
             padding: 1rem;
-            
-            /* ⭐️ 변경된 부분: 단색 배경 대신 그라데이션 효과 추가 */
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            background-attachment: fixed; /* 스크롤해도 그라데이션이 고정되도록 */
+            background-attachment: fixed;
         }
         .container {
             width: 100%;
@@ -38,84 +33,25 @@
             background-color: var(--card-bg-color);
             padding: 2rem;
             border-radius: 12px;
-            box-shadow: 0 4px H2px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        h1 {
-            text-align: center;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-        p {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: #6c757d;
-        }
-        .controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        select, input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
-        }
-        select {
-            flex-basis: 120px;
-        }
-        input {
-            flex-grow: 1;
-        }
-        button {
-            width: 100%;
-            padding: 0.85rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .result-container {
-            margin-top: 1.5rem;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 2rem auto;
-            display: none;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #result {
-            background-color: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            min-height: 100px;
-            white-space: pre-wrap;
-            word-break: keep-all;
-            line-height: 1.6;
-        }
+        h1 { text-align: center; margin-bottom: 0.5rem; font-weight: 700; }
+        p { text-align: center; margin-bottom: 1.5rem; color: #6c757d; }
+        .controls { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        select, input { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; font-family: inherit; }
+        select { flex-basis: 120px; }
+        input { flex-grow: 1; }
+        button { width: 100%; padding: 0.85rem; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s ease; }
+        button:hover { background-color: #0056b3; }
+        .result-container { margin-top: 1.5rem; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 2rem auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #result { background-color: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); min-height: 100px; white-space: pre-wrap; word-break: keep-all; line-height: 1.6; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🗺️ 지지기 동네 찾기</h1>
+        <h1>🗺️ 내 주변 동네 찾기</h1>
         <p>기준점 주변의 동네를 찾아보세요.</p>
         
         <div class="controls">
@@ -125,10 +61,10 @@
                 <option value="10" selected>10km</option>
                 <option value="15">15km</option>
             </select>
-            <input type="text" id="queryInput" placeholder="기준 동네 입력 (예: 한남동)">
+            <input type="text" id="queryInput" placeholder="기준 동네 입력 (예: 강남역)">
         </div>
 
-        <button onclick="search()">검색하기</button>
+        <button id="search-button">검색하기</button>
         
         <div class="result-container">
             <div class="loader" id="loader"></div>
@@ -142,3 +78,35 @@
             const distance = document.getElementById('distanceSelect').value;
             const resultDiv = document.getElementById('result');
             const loader = document.getElementById('loader');
+            
+            if (!query) {
+                resultDiv.textContent = '기준 동네를 입력해주세요!';
+                return;
+            }
+
+            resultDiv.style.display = 'none';
+            loader.style.display = 'block';
+            resultDiv.textContent = '';
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&distance=${distance}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.textContent = `오류: ${data.error}`;
+                } else {
+                    resultDiv.textContent = data.result.replace(/,/g, ', ');
+                }
+            } catch (error) {
+                resultDiv.textContent = '서버와 통신 중 오류가 발생했습니다.';
+            } finally {
+                loader.style.display = 'none';
+                resultDiv.style.display = 'block';
+            }
+        }
+        
+        // ⭐️ 변경된 부분 2: 자바스크립트 코드로 버튼에 클릭 이벤트를 직접 연결
+        document.getElementById('search-button').addEventListener('click', search);
+    </script>
+</body>
+</html>
