@@ -29,6 +29,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 1rem;
+            padding-bottom: 10rem; /* ✨ 수정된 부분: 하단 여백 확보 */
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             background-attachment: fixed;
         }
@@ -346,7 +347,7 @@
         <div class="controls"><select id="distanceSelect"><option value="3" selected>3km</option><option value="5">5km</option></select><input type="text" id="queryInput" placeholder="(예: 한남동)"></div>
         <button id="search-button">검색하기</button>
         <div class="result-area"><div class="result-header"><div class="filter-controls"><label><input type="checkbox" id="gu-filter"> 구단위로만 보기</label><label><input type="checkbox" id="dong-filter"> 동단위로만 보기</label><label><input type="checkbox" id="remove-dong-filter"> '동'제거</label></div><button id="copy-button"><i class="fas fa-copy"></i> 복사하기</button></div><div class="loader" id="loader"></div><div id="result">결과가 여기에 표시됩니다.</div></div>
-        <div class="price-controls"><input type="number" id="priceInput" placeholder="(예: 40)"><button id="price-button">금액 집어넣기</button></div>
+        <div class="price-controls"><input type="number" id="priceInput" placeholder="금액 (예: 40)"><button id="price-button">금액 집어넣기</button></div>
     </div>
 
     <a id="feedback-btn" href="https://open.kakao.com/o/sICyChSh" target="_blank">
@@ -515,7 +516,6 @@
             }
         }
         
-        // ✨ 여기가 수정된 부분입니다 ✨
         function addMessageToScreen(message, isNew) {
             const messageEl = document.createElement('div');
             messageEl.classList.add('message');
@@ -532,14 +532,12 @@
 
             if (message.image_url) {
                 const image = document.createElement('img');
-                // onload 이벤트 핸들러를 먼저 설정
                 image.onload = () => {
-                    // 새 메시지일 경우에만 스크롤
-                    if (isNew) {
+                    if (isNew || message.username === username) {
                        chatMessages.scrollTop = chatMessages.scrollHeight;
                     }
                 };
-                image.src = message.image_url; // src는 onload 설정 후에
+                image.src = message.image_url;
                 image.onclick = () => openLightbox(message.image_url);
                 contentDiv.appendChild(image);
                 contentDiv.classList.add('image-only');
@@ -551,7 +549,6 @@
             messageEl.appendChild(contentDiv);
             chatMessages.appendChild(messageEl);
 
-            // 텍스트 메시지이거나, 내가 보낸 메시지일 경우에만 즉시 스크롤
             if (!message.image_url && (isNew || message.username === username)) {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
@@ -565,7 +562,6 @@
             if (error) { console.error('메시지 전송 실패:', error); } 
             else { 
                 chatInput.value = ''; 
-                // 메시지 전송 후 즉시 스크롤
                 setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 0);
             }
         }
