@@ -8,6 +8,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root {
             --primary-color: #007bff;
@@ -109,47 +112,290 @@
             font-size: 0.95rem; 
             word-break: break-all;
         }
+
+        #chat-fab {
+            position: fixed;
+            bottom: 6rem; 
+            right: 2rem;
+            width: auto; 
+            height: auto;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        #chat-fab:hover { transform: scale(1.05); }
+
+        #feedback-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: auto;
+            height: auto;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            text-decoration: none;
+        }
+        #feedback-btn:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+
+        #chat-window {
+            position: fixed;
+            bottom: 6.5rem;
+            right: 2rem;
+            width: 90%;
+            max-width: 370px;
+            height: 500px;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+        #chat-header {
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #chat-close, #change-nickname-btn { cursor: pointer; }
+        #change-nickname-btn {
+            margin: 0 1rem;
+            transition: opacity 0.2s;
+        }
+        #change-nickname-btn:hover {
+            opacity: 0.7;
+        }
+        #chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0.75rem;
+            max-width: 85%;
+        }
+        .message .username { 
+            font-weight: 700; 
+            font-size: 0.85rem; 
+            margin-bottom: 0.2rem; 
+            color: #6c757d;
+        }
+        .message .content { 
+            font-size: 0.95rem;
+            padding: 0.6rem 0.9rem;
+            border-radius: 18px;
+            word-wrap: break-word;
+            width: fit-content;
+        }
+        
+        .message .content img {
+            max-width: 100%;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .message {
+            align-self: flex-start;
+        }
+        .message .content {
+            background-color: #e9ecef;
+        }
+
+        .message.my-message {
+            align-self: flex-end;
+        }
+        .message.my-message .content {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .message.my-message .username {
+            text-align: right;
+        }
+
+        .message.my-message .content.image-only, .message .content.image-only {
+            background-color: transparent;
+            padding: 0;
+        }
+        
+        #chat-input-area {
+            display: flex;
+            padding: 0.5rem;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+        }
+        #chat-input { flex-grow: 1; border: none; padding: 0.5rem; font-size: 1rem; }
+        #chat-input:focus { outline: none; }
+        #chat-send {
+            background: none; border: none;
+            color: var(--primary-color); font-size: 1.2rem;
+            cursor: pointer; padding: 0 0.5rem;
+        }
+        #chat-send .fa-spinner { animation: spin 1s linear infinite; }
+
+        #image-upload-btn {
+            padding: 0 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #6c757d;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+        }
+        #image-upload-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+        }
+        .modal-content h2 { margin-bottom: 1rem; }
+        .modal-content input { width: 100%; margin-bottom: 1rem; text-align: center; }
+        .modal-content button { font-size: 1rem;
+        background-color: var(--primary-color);
+        }
+
+        #image-lightbox .modal-content {
+            padding: 0.5rem; background: transparent; box-shadow: none;
+        }
+        #image-lightbox img {
+            width: 100%; height: auto; max-height: 85vh; border-radius: 8px;
+        }
+        #image-lightbox-close {
+            position: absolute; top: 1rem; right: 1rem;
+            color: white; font-size: 2rem; cursor: pointer; text-shadow: 0 0 5px black;
+        }
+        
+        #toast-container {
+            position: fixed; top: 1.5rem; left: 50%;
+            transform: translateX(-50%);
+            z-index: 3000;
+        }
+        .toast {
+            background: rgba(0,0,0,0.75); color: white;
+            padding: 0.75rem 1.25rem; border-radius: 25px;
+            font-size: 0.9rem; opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🗺️ 지지기 동네 찾기</h1>
         <p class="description">기준점 주변의 동네를 찾아보세요.</p>
-        <div class="warning-message">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>5km 검색 시 1분에서 3분 가량<br>소요될 수 있습니다.</span>
-        </div>
-        <div class="controls">
-            <select id="distanceSelect">
-                <option value="3" selected>3km</option>
-                <option value="5">5km</option>
-            </select>
-            <input type="text" id="queryInput" placeholder="(예: 한남동)">
-        </div>
+        <div class="warning-message"><i class="fas fa-exclamation-triangle"></i><span>5km 검색 시 1분에서 3분 가량<br>소요될 수 있습니다.</span></div>
+        <div class="controls"><select id="distanceSelect"><option value="3" selected>3km</option><option value="5">5km</option></select><input type="text" id="queryInput" placeholder="(예: 한남동)"></div>
         <button id="search-button">검색하기</button>
-        
-        <div class="result-area">
-            <div class="result-header">
-                <div class="filter-controls">
-                    <label><input type="checkbox" id="gu-filter"> 구단위로만 보기</label>
-                    <label><input type="checkbox" id="dong-filter"> 동단위로만 보기</label>
-                    <label><input type="checkbox" id="remove-dong-filter"> '동'제거</label>
-                </div>
-                <button id="copy-button"><i class="fas fa-copy"></i> 복사하기</button>
+        <div class="result-area"><div class="result-header"><div class="filter-controls"><label><input type="checkbox" id="gu-filter"> 구단위로만 보기</label><label><input type="checkbox" id="dong-filter"> 동단위로만 보기</label><label><input type="checkbox" id="remove-dong-filter"> '동'제거</label></div><button id="copy-button"><i class="fas fa-copy"></i> 복사하기</button></div><div class="loader" id="loader"></div><div id="result">결과가 여기에 표시됩니다.</div></div>
+        <div class="price-controls"><input type="number" id="priceInput" placeholder="(예: 40)"><button id="price-button">금액 집어넣기</button></div>
+    </div>
+
+    <a id="feedback-btn" href="https://open.kakao.com/o/sICyChSh" target="_blank">
+        <i class="fas fa-bullhorn"></i>
+        <span>건의하기</span>
+    </a>
+
+    <div id="chat-fab">
+        <i class="fas fa-comments"></i>
+        <span>지지기 소통</span>
+    </div>
+    <div id="chat-window">
+        <div id="chat-header">
+            <div id="chat-header-left">
+                <span id="chat-username-display">실시간 채팅</span>
             </div>
-            <div class="loader" id="loader"></div>
-            <div id="result">결과가 여기에 표시됩니다.</div>
+            <div>
+                <span id="change-nickname-btn" title="닉네임 변경"><i class="fas fa-edit"></i></span>
+                <span id="chat-close"><i class="fas fa-times"></i></span>
+            </div>
         </div>
-        
-        <div class="price-controls">
-            <input type="number" id="priceInput" placeholder="(예: 40)">
-            <button id="price-button">금액 집어넣기</button>
+        <div id="chat-messages"></div>
+        <div id="chat-input-area">
+            <label for="image-upload-input" id="image-upload-btn" title="사진 보내기"><i class="fas fa-paperclip"></i></label>
+            <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+            <input type="text" id="chat-input" placeholder="메시지 입력...">
+            <button id="chat-send"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
-    <script>
-        let originalSearchResult = '';
+    <div id="nickname-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>닉네임 설정</h2>
+            <input type="text" id="nickname-input" placeholder="사용할 닉네임 (최대 10자)" maxlength="10">
+            <button id="nickname-submit-btn">채팅 시작하기</button>
+        </div>
+    </div>
+    <div id="image-lightbox" class="modal-overlay">
+        <span id="image-lightbox-close">&times;</span>
+        <div class="modal-content">
+            <img id="lightbox-image" src="" alt="확대 이미지">
+        </div>
+    </div>
+    <div id="toast-container"></div>
 
+
+    <script>
+        // --- 동네 찾기 스크립트 (완벽 유지) ---
+        let originalSearchResult = '';
         const queryInput = document.getElementById('queryInput');
         const distanceSelect = document.getElementById('distanceSelect');
         const resultDiv = document.getElementById('result');
@@ -162,105 +408,236 @@
         const priceButton = document.getElementById('price-button');
         const copyButton = document.getElementById('copy-button');
 
-        function updateDisplay() {
-            if (!originalSearchResult) return;
-            const price = priceInput.value;
-            const showGuOnly = guFilter.checked;
-            const showDongOnly = dongFilter.checked;
-            const removeDong = removeDongFilter.checked;
-            
-            let neighborhoods = originalSearchResult.split(',');
+        function updateDisplay() { if (!originalSearchResult) return; const price = priceInput.value; const showGuOnly = guFilter.checked; const showDongOnly = dongFilter.checked; const removeDong = removeDongFilter.checked; let neighborhoods = originalSearchResult.split(','); let newNeighborhoods = neighborhoods.map(fullDong => { let displayDong = fullDong.trim(); const parts = displayDong.split(' '); if (showGuOnly && parts.length >= 3) { displayDong = parts.slice(1).join(' '); } else if (showDongOnly && parts.length >= 2) { displayDong = parts[parts.length - 1]; } if (removeDong) { const originalBeforeRemove = displayDong; let removed = originalBeforeRemove; if (removed.endsWith('동')) { removed = removed.slice(0, -1); } if (removed.length > 1) { displayDong = removed; } } if (price) { displayDong += '#' + price; } return displayDong; }); resultDiv.textContent = newNeighborhoods.join(','); }
+        async function search() { const query = queryInput.value; const distance = distanceSelect.value; if (!query) { resultDiv.textContent = '기준 동네를 입력해주세요!'; return; } resultDiv.style.display = 'none'; loader.style.display = 'block'; resultDiv.textContent = ''; originalSearchResult = ''; guFilter.checked = false; dongFilter.checked = false; removeDongFilter.checked = false; try { const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&distance=${distance}`); const data = await response.json(); if (data.error) { resultDiv.textContent = `오류: ${data.error}`; } else { originalSearchResult = data.result; updateDisplay(); } } catch (error) { resultDiv.textContent = '서버와 통신 중 오류가 발생했습니다.'; } finally { loader.style.display = 'none'; resultDiv.style.display = 'block'; } }
+        function copyResults() { const textToCopy = resultDiv.textContent; if (!textToCopy || textToCopy.startsWith('결과가') || textToCopy.startsWith('오류:')) { return; } navigator.clipboard.writeText(textToCopy).then(() => { const originalContent = copyButton.innerHTML; copyButton.innerHTML = '<i class="fas fa-check"></i> 복사 완료!'; setTimeout(() => { copyButton.innerHTML = originalContent; }, 2000); }).catch(err => { console.error('복사 실패:', err); }); }
+        searchButton.addEventListener('click', search); priceButton.addEventListener('click', updateDisplay); guFilter.addEventListener('change', () => { if (guFilter.checked) dongFilter.checked = false; updateDisplay(); }); dongFilter.addEventListener('change', () => { if (dongFilter.checked) guFilter.checked = false; updateDisplay(); }); removeDongFilter.addEventListener('change', updateDisplay); copyButton.addEventListener('click', copyResults);
+        
+        // --- Supabase 채팅 스크립트 ---
+        const { createClient } = supabase;
+        const SUPABASE_URL = 'https://qknvtsjkmdaqfijcegll.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFrbnZ0c2prbWRhcWZpamNlZ2xsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc5MzIzNDQsImV4cCI6MjA3MzUwODM0NH0.Bjg_Mdt4rjPSREJif_ysC95IKA3Bkn0eH3cOYlsXhW4';
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        const chatFab = document.getElementById('chat-fab');
+        const chatWindow = document.getElementById('chat-window');
+        const chatClose = document.getElementById('chat-close');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const chatSend = document.getElementById('chat-send');
+        const chatUsernameDisplay = document.getElementById('chat-username-display');
+        const changeNicknameBtn = document.getElementById('change-nickname-btn');
+        const imageUploadInput = document.getElementById('image-upload-input');
+        let username = '';
+        
+        const nicknameModal = document.getElementById('nickname-modal');
+        const nicknameInput = document.getElementById('nickname-input');
+        const nicknameSubmitBtn = document.getElementById('nickname-submit-btn');
+        const imageLightbox = document.getElementById('image-lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const imageLightboxClose = document.getElementById('image-lightbox-close');
 
-            let newNeighborhoods = neighborhoods.map(fullDong => {
-                let displayDong = fullDong.trim();
-                const parts = displayDong.split(' ');
-                
-                if (showGuOnly && parts.length >= 3) { 
-                    displayDong = parts.slice(1).join(' ');
-                } else if (showDongOnly && parts.length >= 2) {
-                    displayDong = parts[parts.length - 1];
-                }
-                
-                if (removeDong) {
-                    const originalBeforeRemove = displayDong;
-                    let removed = originalBeforeRemove;
-                    
-                    if (removed.endsWith('동')) {
-                        removed = removed.slice(0, -1);
-                    }
-                    
-                    // ⭐️ 변경된 부분: '동'을 제거한 후 글자 길이를 확인
-                    if (removed.length > 1) {
-                        displayDong = removed;
-                    }
-                }
-
-                if (price) {
-                    displayDong += '#' + price;
-                }
-                
-                return displayDong;
-            });
-            
-            resultDiv.textContent = newNeighborhoods.join(',');
+        function showToast(message) {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
         }
 
-        async function search() {
-            const query = queryInput.value;
-            const distance = distanceSelect.value;
-            if (!query) { resultDiv.textContent = '기준 동네를 입력해주세요!'; return; }
-            resultDiv.style.display = 'none';
-            loader.style.display = 'block';
-            resultDiv.textContent = '';
-            originalSearchResult = '';
-            guFilter.checked = false;
-            dongFilter.checked = false;
-            removeDongFilter.checked = false;
-            try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&distance=${distance}`);
-                const data = await response.json();
-                if (data.error) {
-                    resultDiv.textContent = `오류: ${data.error}`;
-                } else {
-                    originalSearchResult = data.result;
-                    updateDisplay();
+        function openNicknameModal() {
+            nicknameInput.value = username.startsWith('익명-') ? '' : username;
+            nicknameModal.style.display = 'flex';
+            nicknameInput.focus();
+        }
+
+        function handleNicknameSubmit() {
+            let newUsername = nicknameInput.value.trim();
+            if (newUsername === '') {
+                let anonymousId = localStorage.getItem('anonymousUserId');
+                if (!anonymousId) {
+                    anonymousId = Math.random().toString(36).substr(2, 5);
+                    localStorage.setItem('anonymousUserId', anonymousId);
                 }
-            } catch (error) {
-                resultDiv.textContent = '서버와 통신 중 오류가 발생했습니다.';
-            } finally {
-                loader.style.display = 'none';
-                resultDiv.style.display = 'block';
+                newUsername = `익명-${anonymousId}`;
+            } else if (newUsername.length > 10) {
+                newUsername = newUsername.slice(0, 10);
+            }
+            username = newUsername;
+            sessionStorage.setItem('chatUsername', username);
+            chatUsernameDisplay.textContent = username;
+            showToast(`'${username}'(으)로 닉네임이 설정되었습니다.`);
+            nicknameModal.style.display = 'none';
+            fetchMessages();
+        }
+
+        function openLightbox(imageUrl) {
+            lightboxImage.src = imageUrl;
+            imageLightbox.style.display = 'flex';
+        }
+
+        nicknameSubmitBtn.addEventListener('click', handleNicknameSubmit);
+        nicknameInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleNicknameSubmit(); });
+        imageLightboxClose.addEventListener('click', () => imageLightbox.style.display = 'none');
+        imageLightbox.addEventListener('click', (e) => {
+             if (e.target === imageLightbox) imageLightbox.style.display = 'none';
+        });
+
+        changeNicknameBtn.addEventListener('click', openNicknameModal);
+
+        chatFab.addEventListener('click', () => {
+            chatWindow.style.display = 'flex';
+            const savedUsername = sessionStorage.getItem('chatUsername'); 
+            if (savedUsername) {
+                username = savedUsername;
+                chatUsernameDisplay.textContent = username;
+                fetchMessages();
+            } else {
+                openNicknameModal();
+            }
+        });
+
+        chatClose.addEventListener('click', () => { chatWindow.style.display = 'none'; });
+
+        async function fetchMessages() {
+            if (!username) return; 
+            const { data, error } = await supabaseClient.from('messages').select('*').order('created_at', { ascending: true }).limit(100);
+            if (error) { console.error('메시지 불러오기 실패:', error); } 
+            else {
+                chatMessages.innerHTML = '';
+                data.forEach(message => addMessageToScreen(message, false));
+                setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 0);
+            }
+        }
+        
+        // ✨ 여기가 수정된 부분입니다 ✨
+        function addMessageToScreen(message, isNew) {
+            const messageEl = document.createElement('div');
+            messageEl.classList.add('message');
+            if (message.username === username) messageEl.classList.add('my-message');
+
+            const usernameDiv = document.createElement('div');
+            const usernameSpan = document.createElement('span');
+            usernameSpan.classList.add('username');
+            usernameSpan.textContent = message.username;
+            usernameDiv.appendChild(usernameSpan);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('content');
+
+            if (message.image_url) {
+                const image = document.createElement('img');
+                // onload 이벤트 핸들러를 먼저 설정
+                image.onload = () => {
+                    // 새 메시지일 경우에만 스크롤
+                    if (isNew) {
+                       chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                };
+                image.src = message.image_url; // src는 onload 설정 후에
+                image.onclick = () => openLightbox(message.image_url);
+                contentDiv.appendChild(image);
+                contentDiv.classList.add('image-only');
+            } else if (message.content) {
+                contentDiv.textContent = message.content;
+            }
+
+            messageEl.appendChild(usernameDiv);
+            messageEl.appendChild(contentDiv);
+            chatMessages.appendChild(messageEl);
+
+            // 텍스트 메시지이거나, 내가 보낸 메시지일 경우에만 즉시 스크롤
+            if (!message.image_url && (isNew || message.username === username)) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         }
 
-        function copyResults() {
-            const textToCopy = resultDiv.textContent;
-            if (!textToCopy || textToCopy.startsWith('결과가') || textToCopy.startsWith('오류:')) {
+        async function sendMessage() {
+            const content = chatInput.value.trim();
+            if (content.length === 0) return;
+            if (!username) { openNicknameModal(); return; }
+            const { error } = await supabaseClient.from('messages').insert([{ username: username, content: content }]);
+            if (error) { console.error('메시지 전송 실패:', error); } 
+            else { 
+                chatInput.value = ''; 
+                // 메시지 전송 후 즉시 스크롤
+                setTimeout(() => { chatMessages.scrollTop = chatMessages.scrollHeight; }, 0);
+            }
+        }
+
+        async function uploadImage(event) {
+            const imageUploadBtn = document.getElementById('image-upload-btn');
+            const originalSendIcon = chatSend.innerHTML;
+
+            if (!username) { openNicknameModal(); return; }
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 업로드할 수 있습니다.');
+                event.target.value = '';
                 return;
             }
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const originalContent = copyButton.innerHTML;
-                copyButton.innerHTML = '<i class="fas fa-check"></i> 복사 완료!';
-                setTimeout(() => {
-                    copyButton.innerHTML = originalContent;
-                }, 2000);
-            }).catch(err => {
-                console.error('복사 실패:', err);
-            });
+            if (file.size > 15 * 1024 * 1024) { 
+                alert('15MB 이하의 이미지만 업로드할 수 있습니다.');
+                event.target.value = '';
+                return;
+            }
+            
+            chatInput.disabled = true;
+            chatSend.disabled = true;
+            imageUploadBtn.style.pointerEvents = 'none';
+            chatSend.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                let safeUserId = localStorage.getItem('anonymousUserId');
+                if (!safeUserId) {
+                    safeUserId = Math.random().toString(36).substr(2, 5);
+                    localStorage.setItem('anonymousUserId', safeUserId);
+                }
+                const fileExt = file.name.split('.').pop();
+                const newFileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+                const filePath = `${safeUserId}/${newFileName}`;
+                
+                const { data, error: uploadError } = await supabaseClient.storage.from('chat-images').upload(filePath, file);
+                if (uploadError) { 
+                    throw new Error('이미지 업로드에 실패했습니다.');
+                }
+
+                const { data: { publicUrl } } = supabaseClient.storage.from('chat-images').getPublicUrl(data.path);
+                const { error: insertError } = await supabaseClient.from('messages').insert([{ username: username, image_url: publicUrl, content: '' }]);
+                if (insertError) { 
+                    throw new Error('이미지 전송에 실패했습니다.');
+                }
+            } catch (error) {
+                alert(error.message);
+                console.error(error);
+            } finally {
+                chatInput.disabled = false;
+                chatSend.disabled = false;
+                imageUploadBtn.style.pointerEvents = 'auto';
+                chatSend.innerHTML = originalSendIcon;
+                event.target.value = '';
+            }
         }
 
-        searchButton.addEventListener('click', search);
-        priceButton.addEventListener('click', updateDisplay);
-        guFilter.addEventListener('change', () => {
-            if (guFilter.checked) dongFilter.checked = false;
-            updateDisplay();
-        });
-        dongFilter.addEventListener('change', () => {
-            if (dongFilter.checked) guFilter.checked = false;
-            updateDisplay();
-        });
-        removeDongFilter.addEventListener('change', updateDisplay);
-        copyButton.addEventListener('click', copyResults);
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
+        imageUploadInput.addEventListener('change', uploadImage);
+
+        supabaseClient.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => { addMessageToScreen(payload.new, true); }).subscribe();
+
+        const initialUsername = sessionStorage.getItem('chatUsername');
+        if (initialUsername) {
+            username = initialUsername;
+            chatUsernameDisplay.textContent = username;
+            fetchMessages();
+        }
     </script>
 </body>
 </html>
