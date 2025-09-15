@@ -27,22 +27,17 @@
         body {
             font-family: 'Noto Sans KR', sans-serif;
             color: var(--text-color);
-            display: flex;
-            /* ✨ 수정: flex 관련 속성 제거 */
-            justify-content: center;
-            align-items: center;
-            min-height: 100%;
+            min-height: 100%; 
             padding: 1rem;
             background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             background-attachment: fixed;
         }
-        /* ✨ 추가: 스크롤되는 컨텐츠를 감싸는 래퍼 */
         .page-content {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 100%;
-            padding-bottom: 2rem; /* 하단 여백 */
+            padding-bottom: 2rem;
         }
         .container {
             width: 100%;
@@ -91,7 +86,12 @@
             border-radius: 8px; font-size: 1rem; font-family: inherit;
         }
         select { width: 120px; flex-shrink: 0; }
-        input[type="text"] { width: calc(100% - 120px - 0.75rem); }
+        
+        /* ✨ 수정: 스타일 적용 대상을 .controls 내부의 input으로 한정 */
+        .controls input[type="text"] { 
+            flex: 1;
+            min-width: 0;
+        }
         input[type="number"] { width: 120px; }
         button {
             width: 100%; padding: 0.85rem; color: white; border: none;
